@@ -1,0 +1,48 @@
+CC=arm-linux-gcc
+LINK=arm-linux-gcc
+LFLAGS=-Wl -shared -Wl,-soname,libjfree.so.1.0
+LIBS=-ldl
+CFLAGS=-mcpu=xscale -fno-exceptions -O2 -msoft-float -pipe -fPIC -mfpe=2 -g -Wall
+
+#/*****************************************************************************
+# *								              *	
+# * JFree ARM Heap Analyzer						      *
+# * 									      *
+# * 	Julio Auto 			 <julio *noSPAM* julioauto.com>       *
+# *	Rodrigo Rubira Branco (BSDaemon) <rodrigo *noSPAM* kernelhacking.com> *
+# *****************************************************************************/
+
+jfree: CFLAGS+=-I . -DUPGRADE_ARM_STACK_UNWIND
+jfree: OBJECTS=unwarminder.o unwarm.o unwarm_thumb.o unwarm_arm.o unwarmmem.o client.o jfree.o
+jfree_clean: OBJECTS=unwarminder.o unwarm.o unwarm_thumb.o unwarm_arm.o unwarmmem.o client.o jfree.o
+
+jfree: libjfree.so.1.0
+
+libjfree.so.1.0: unwarminder.o unwarm.o unwarm_thumb.o unwarm_arm.o unwarmmem.o client.o jfree.o
+	$(LINK) $(LFLAGS) -o $@ $(OBJECTS) $(LIBS)
+
+jfree.o: jfree.c
+	$(CC) -c $(CFLAGS) -o $@ jfree.c
+    
+unwarm_arm.o: unwarm_arm.c
+	$(CC) -c $(CFLAGS) -o $@ unwarm_arm.c
+    
+unwarm_thumb.o: unwarm_thumb.c
+	$(CC) -c $(CFLAGS) -o $@ unwarm_thumb.c
+    
+unwarm.o: unwarm.c
+	$(CC) -c $(CFLAGS) -o $@ unwarm.c
+    
+unwarmmem.o: unwarmmem.c
+	$(CC) -c $(CFLAGS) -o $@ unwarmmem.c
+    
+unwarminder.o: unwarminder.c
+	$(CC) -c $(CFLAGS) -o $@ unwarminder.c
+    
+client.o: client.c
+	$(CC) -c $(CFLAGS) -o $@ client.c
+
+jfree_clean:
+	rm -f $(OBJECTS) libjfree.so.1.0
+    
+.PHONY: jfree jfree_clean
